@@ -60,7 +60,7 @@
           <% end %>
 
           <%# View in SOVA plugin start %>
-          <% if ['archival_object'].include?(record.jsonmodel_type) && JSONModel(:resource).find(parent_link[:id]).finding_aid_status == 'publish' %>
+          <% if ['archival_object'].include?(record.jsonmodel_type) && JSONModel(:resource).find(parent_link[:id]).finding_aid_status == 'publish' && record.publish == true %>
             <%= link_to t('view_in_sova'),
                         URI::HTTPS.build(host: URI(AppConfig[:sova_url]).hostname,
                                          path: ToolbarHelper::sova_link_from_record(record.ref_id, 'archival_object')).to_s,

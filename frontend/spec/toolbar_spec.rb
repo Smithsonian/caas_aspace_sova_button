@@ -42,10 +42,19 @@ describe 'View in SOVA toolbar button', js: true do
 
     set_repo @repository
 
-    @resource = create(:resource, title: "Unpublished Resource", ead_id: 'USA.123')
+    @unpublished_resource = create(:resource, title: "Unpublished Resource", ead_id: 'USA.123')
     @published_resource = create(:resource, title: "Published Resource", ead_id: 'USA.456')
-    @unpublished_ao = create(:archival_object, title: "Archival Object Unpublished Resource", resource: { ref: @resource.uri })
-    @published_ao = create(:archival_object, title: "Archival Object Published Resource", resource: { ref: @published_resource.uri })
+    @unpublished_resource_ao = create(:archival_object,
+                                      title: "Archival Object Unpublished Resource",
+                                      resource: { ref: @unpublished_resource.uri })
+    @published_ao = create(:archival_object,
+                           title: "Published Archival Object Published Resource",
+                           publish: true,
+                           resource: { ref: @published_resource.uri })
+    @unpublished_ao = create(:archival_object,
+                             title: "Unpublished Archival Object Published Resource",
+                             publish: false,
+                             resource: { ref: @published_resource.uri })
 
     run_index_round
   end
@@ -57,14 +66,14 @@ describe 'View in SOVA toolbar button', js: true do
 
   context 'when finding aid status is not publish' do
     it 'does not show the button on the resource' do
-      visit "resources/#{@resource.id}"
+      visit "resources/#{@unpublished_resource.id}"
       wait_for_ajax
 
       expect(page).not_to have_text 'View in SOVA'
     end
 
     it 'does not show the button on a child archival object' do
-      visit "resources/#{@resource.id}/edit#tree::archival_object_#{@unpublished_ao.id}"
+      visit "resources/#{@unpublished_resource.id}/edit#tree::archival_object_#{@unpublished_resource_ao.id}"
 
       wait_for_ajax
 
@@ -86,7 +95,7 @@ describe 'View in SOVA toolbar button', js: true do
       expect(button[:href]).to match('https://sova.si.edu/record/usa.456')
     end
 
-    it 'shows the button with correct sova link on a child archival object' do
+    it 'shows the button with correct sova link on a published child archival object' do
       visit "resources/#{@published_resource.id}/edit#tree::archival_object_#{@published_ao.id}"
 
       wait_for_ajax
@@ -95,6 +104,14 @@ describe 'View in SOVA toolbar button', js: true do
 
       button = find(:xpath, '//a[text()="View in SOVA"]')
       expect(button[:href]).to start_with('https://sova.si.edu/record/')
+    end
+
+    it 'does not show the button on an unpublished child archival object' do
+      visit "resources/#{@published_resource.id}/edit#tree::archival_object_#{@unpublished_ao.id}"
+
+      wait_for_ajax
+
+      expect(page).not_to have_text 'View in SOVA'
     end
   end
 end
