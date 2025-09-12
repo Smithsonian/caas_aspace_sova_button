@@ -107,4 +107,40 @@ describe 'View in SOVA toolbar button', js: true do
       expect(page).not_to have_text 'View in SOVA'
     end
   end
+
+  context 'when finding aid status is publish but the resource has no EAD ID' do
+    before(:each) do
+      add_enum
+
+      @eadidless_resource = create(:resource,
+                                  title: "Published Resource without EAD ID",
+                                  ead_id: '',
+                                  finding_aid_status: 'publish')
+
+      @eadidless_ao = create(:archival_object,
+                             title: "Published Archival Object Published Resource Without EADID",
+                             publish: true,
+                             resource: { ref: @eadidless_resource.uri })
+
+      run_index_round
+    end
+
+    it 'shows the button on the resource' do
+      visit "resources/#{@eadidless_resource.id}/edit"
+
+      wait_for_ajax
+
+      expect(page).not_to have_text 'Internal Server Error'
+      expect(page).to have_text 'View in SOVA'
+    end
+
+    it 'shows the button on the archival object' do
+      visit "resources/#{@published_resource.id}/edit#tree::archival_object_#{@eadidless_ao.id}"
+
+      wait_for_ajax
+
+      expect(page).not_to have_text 'Internal Server Error'
+      expect(page).to have_text 'View in SOVA'
+    end
+  end
 end

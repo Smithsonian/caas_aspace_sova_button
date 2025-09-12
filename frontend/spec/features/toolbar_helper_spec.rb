@@ -10,7 +10,7 @@ describe ToolbarHelper do
 
       context 'when a standard ead_id' do
         let(:record_id) {'EAD.123'}
-      
+
         it "returns '/record/{downcased-eadid}'" do
           expect(ToolbarHelper::sova_link_from_record(record_id, record_type)).to eq('/record/ead.123')
         end
@@ -18,9 +18,17 @@ describe ToolbarHelper do
 
       context 'when ead_id has trailing whitespace' do
         let(:record_id) {'EAD.123 '}
-      
+
         it 'strips the trailing whitespace' do
           expect(ToolbarHelper::sova_link_from_record(record_id, record_type)).to eq('/record/ead.123')
+        end
+      end
+
+      context 'when ead_id is nil' do
+        let(:record_id) {''}
+
+        it 'still builds a link' do
+          expect(ToolbarHelper::sova_link_from_record(record_id, record_type)).to eq('/record/')
         end
       end
     end
